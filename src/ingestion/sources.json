@@ -1,0 +1,421 @@
+[
+    {
+        "id": "academy-claude-101",
+        "title": "Claude 101",
+        "url": "https://anthropic.skilljar.com/claude-101",
+        "cca_f_domain": "prompt_engineering",
+        "enabled": false,
+        "notes": "Skilljar; verify public fetchability before enabling"
+    },
+    {
+        "id": "academy-ai-fluency",
+        "title": "AI Fluency: Framework & Foundations",
+        "url": "https://anthropic.skilljar.com/ai-fluency-framework-foundations",
+        "cca_f_domain": "prompt_engineering",
+        "enabled": false,
+        "notes": "Skilljar; verify public fetchability before enabling"
+    },
+    {
+        "id": "academy-claude-api",
+        "title": "Building with the Claude API",
+        "url": "https://anthropic.skilljar.com/claude-with-the-anthropic-api",
+        "cca_f_domain": "tool_design_mcp",
+        "enabled": false,
+        "notes": "Skilljar; verify public fetchability before enabling"
+    },
+    {
+        "id": "academy-claude-code-in-action",
+        "title": "Claude Code in Action",
+        "url": "https://anthropic.skilljar.com/claude-code-in-action",
+        "cca_f_domain": "claude_code_workflows",
+        "enabled": false,
+        "notes": "Skilljar; URL unconfirmed \u2014 verify before enabling"
+    },
+    {
+        "id": "tool-use-overview",
+        "title": "Tool use overview",
+        "url": "https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview",
+        "cca_f_domain": "agentic_architecture",
+        "enabled": true
+    },
+    {
+        "id": "managed-agents-overview",
+        "title": "Managed Agents overview",
+        "url": "https://platform.claude.com/docs/en/managed-agents/overview",
+        "cca_f_domain": "agentic_architecture",
+        "enabled": true
+    },
+    {
+        "id": "managed-agents-quickstart",
+        "title": "Managed Agents quickstart",
+        "url": "https://platform.claude.com/docs/en/managed-agents/quickstart",
+        "cca_f_domain": "agentic_architecture",
+        "enabled": true
+    },
+    {
+        "id": "what-is-mcp",
+        "title": "What is MCP",
+        "url": "https://docs.claude.com/en/docs/mcp",
+        "cca_f_domain": "tool_design_mcp",
+        "enabled": true
+    },
+    {
+        "id": "mcp-connector",
+        "title": "MCP connector (API-side)",
+        "url": "https://platform.claude.com/docs/en/agents-and-tools/mcp-connector",
+        "cca_f_domain": "tool_design_mcp",
+        "enabled": true
+    },
+    {
+        "id": "building-mcp-servers",
+        "title": "Building MCP servers",
+        "url": "https://claude.com/docs/connectors/building/mcp",
+        "cca_f_domain": "tool_design_mcp",
+        "enabled": true
+    },
+    {
+        "id": "web-search-tool",
+        "title": "Web search tool",
+        "url": "https://platform.claude.com/docs/en/agents-and-tools/tool-use/web-search-tool",
+        "cca_f_domain": "tool_design_mcp",
+        "enabled": true
+    },
+    {
+        "id": "code-execution-tool",
+        "title": "Code execution tool",
+        "url": "https://platform.claude.com/docs/en/agents-and-tools/tool-use/code-execution-tool",
+        "cca_f_domain": "tool_design_mcp",
+        "enabled": true
+    },
+    {
+        "id": "claude-code-overview",
+        "title": "Claude Code overview",
+        "url": "https://code.claude.com/docs/en/overview",
+        "cca_f_domain": "claude_code_workflows",
+        "enabled": true
+    },
+    {
+        "id": "claude-code-quickstart",
+        "title": "Claude Code quickstart",
+        "url": "https://code.claude.com/docs/en/quickstart",
+        "cca_f_domain": "claude_code_workflows",
+        "enabled": true
+    },
+    {
+        "id": "claude-code-docs-map",
+        "title": "Claude Code full docs index",
+        "url": "https://code.claude.com/docs/en/claude_code_docs_map.md",
+        "cca_f_domain": "claude_code_workflows",
+        "enabled": true
+    },
+    {
+        "id": "prompting-best-practices",
+        "title": "Prompting best practices",
+        "url": "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/overview",
+        "cca_f_domain": "prompt_engineering",
+        "enabled": true
+    },
+    {
+        "id": "structured-outputs",
+        "title": "Structured outputs",
+        "url": "https://platform.claude.com/docs/en/build-with-claude/structured-outputs",
+        "cca_f_domain": "prompt_engineering",
+        "enabled": true
+    },
+    {
+        "id": "extended-thinking",
+        "title": "Extended thinking",
+        "url": "https://platform.claude.com/docs/en/build-with-claude/thinking",
+        "cca_f_domain": "prompt_engineering",
+        "enabled": true
+    },
+    {
+        "id": "prompt-caching",
+        "title": "Prompt caching",
+        "url": "https://platform.claude.com/docs/en/build-with-claude/prompt-caching",
+        "cca_f_domain": "context_management",
+        "enabled": true
+    },
+    {
+        "id": "streaming",
+        "title": "Streaming",
+        "url": "https://platform.claude.com/docs/en/build-with-claude/streaming",
+        "cca_f_domain": "context_management",
+        "enabled": true
+    },
+    {
+        "id": "rate-limits-and-errors",
+        "title": "Rate limits and errors",
+        "url": "https://platform.claude.com/docs/en/api/rate-limits",
+        "cca_f_domain": "context_management",
+        "enabled": true
+    },
+    {
+        "id": "running-evals",
+        "title": "Running evals",
+        "url": "https://platform.claude.com/docs/en/test-and-evaluate/develop-tests",
+        "cca_f_domain": "context_management",
+        "enabled": true
+    },
+    {
+        "id": "increasing-output-consistency",
+        "title": "Increasing output consistency",
+        "url": "https://platform.claude.com/docs/en/test-and-evaluate/strengthen-guardrails/increase-consistency",
+        "cca_f_domain": "context_management",
+        "enabled": true
+    },
+    {
+        "id": "batch-processing",
+        "title": "Batch processing",
+        "url": "https://platform.claude.com/docs/en/build-with-claude/batch-processing",
+        "cca_f_domain": "context_management",
+        "enabled": true
+    },
+    {
+        "id": "usage-cost-monitoring",
+        "title": "Usage/cost monitoring",
+        "url": "https://platform.claude.com/docs/en/build-with-claude/usage-cost-api",
+        "cca_f_domain": "context_management",
+        "enabled": true
+    },
+    {
+        "id": "ccg-1-1-agentic-loops",
+        "title": "1.1 \u2014 Agentic Loops",
+        "url": "https://claudecertificationguide.com/learn/1-agentic-architecture/1-1-agentic-loops",
+        "cca_f_domain": "agentic_architecture",
+        "enabled": true,
+        "notes": "Claude Certification Guide (third-party study site)"
+    },
+    {
+        "id": "ccg-1-2-orchestration-patterns",
+        "title": "1.2 \u2014 Multi-Agent Orchestration",
+        "url": "https://claudecertificationguide.com/learn/1-agentic-architecture/1-2-orchestration-patterns",
+        "cca_f_domain": "agentic_architecture",
+        "enabled": true,
+        "notes": "Claude Certification Guide (third-party study site)"
+    },
+    {
+        "id": "ccg-1-3-subagent-invocation-context",
+        "title": "1.3 \u2014 Subagent Invocation and Context Passing",
+        "url": "https://claudecertificationguide.com/learn/1-agentic-architecture/1-3-subagent-invocation-context",
+        "cca_f_domain": "agentic_architecture",
+        "enabled": true,
+        "notes": "Claude Certification Guide (third-party study site)"
+    },
+    {
+        "id": "ccg-1-4-workflow-enforcement-handoff",
+        "title": "1.4 \u2014 Workflow Enforcement and Handoff",
+        "url": "https://claudecertificationguide.com/learn/1-agentic-architecture/1-4-workflow-enforcement-handoff",
+        "cca_f_domain": "agentic_architecture",
+        "enabled": true,
+        "notes": "Claude Certification Guide (third-party study site)"
+    },
+    {
+        "id": "ccg-1-5-agent-sdk-hooks",
+        "title": "1.5 \u2014 Agent SDK Hooks",
+        "url": "https://claudecertificationguide.com/learn/1-agentic-architecture/1-5-agent-sdk-hooks",
+        "cca_f_domain": "agentic_architecture",
+        "enabled": true,
+        "notes": "Claude Certification Guide (third-party study site)"
+    },
+    {
+        "id": "ccg-1-6-task-decomposition",
+        "title": "1.6 \u2014 Task Decomposition Strategies",
+        "url": "https://claudecertificationguide.com/learn/1-agentic-architecture/1-6-task-decomposition",
+        "cca_f_domain": "agentic_architecture",
+        "enabled": true,
+        "notes": "Claude Certification Guide (third-party study site)"
+    },
+    {
+        "id": "ccg-1-7-session-state-resumption",
+        "title": "1.7 \u2014 Session State and Resumption",
+        "url": "https://claudecertificationguide.com/learn/1-agentic-architecture/1-7-session-state-resumption",
+        "cca_f_domain": "agentic_architecture",
+        "enabled": true,
+        "notes": "Claude Certification Guide (third-party study site)"
+    },
+    {
+        "id": "ccg-2-1-tool-schema-design",
+        "title": "2.1 \u2014 Tool Interface Design",
+        "url": "https://claudecertificationguide.com/learn/2-tool-design-mcp/2-1-tool-schema-design",
+        "cca_f_domain": "tool_design_mcp",
+        "enabled": true,
+        "notes": "Claude Certification Guide (third-party study site)"
+    },
+    {
+        "id": "ccg-2-2-structured-error-responses",
+        "title": "2.2 \u2014 Structured Error Responses",
+        "url": "https://claudecertificationguide.com/learn/2-tool-design-mcp/2-2-structured-error-responses",
+        "cca_f_domain": "tool_design_mcp",
+        "enabled": true,
+        "notes": "Claude Certification Guide (third-party study site)"
+    },
+    {
+        "id": "ccg-2-3-tool-distribution-choice",
+        "title": "2.3 \u2014 Tool Distribution & Tool Choice",
+        "url": "https://claudecertificationguide.com/learn/2-tool-design-mcp/2-3-tool-distribution-choice",
+        "cca_f_domain": "tool_design_mcp",
+        "enabled": true,
+        "notes": "Claude Certification Guide (third-party study site)"
+    },
+    {
+        "id": "ccg-2-4-mcp-server-integration",
+        "title": "2.4 \u2014 MCP Server Integration",
+        "url": "https://claudecertificationguide.com/learn/2-tool-design-mcp/2-4-mcp-server-integration",
+        "cca_f_domain": "tool_design_mcp",
+        "enabled": true,
+        "notes": "Claude Certification Guide (third-party study site)"
+    },
+    {
+        "id": "ccg-2-5-built-in-tools",
+        "title": "2.5 \u2014 Built-in Tools",
+        "url": "https://claudecertificationguide.com/learn/2-tool-design-mcp/2-5-built-in-tools",
+        "cca_f_domain": "tool_design_mcp",
+        "enabled": true,
+        "notes": "Claude Certification Guide (third-party study site)"
+    },
+    {
+        "id": "ccg-3-1-claude-md-hierarchy",
+        "title": "3.1 \u2014 CLAUDE.md Hierarchy, Scoping, and Modular Organisation",
+        "url": "https://claudecertificationguide.com/learn/3-claude-code-config/3-1-claude-md-hierarchy",
+        "cca_f_domain": "claude_code_workflows",
+        "enabled": true,
+        "notes": "Claude Certification Guide (third-party study site)"
+    },
+    {
+        "id": "ccg-3-2-slash-commands-skills",
+        "title": "3.2 \u2014 Custom Slash Commands and Skills",
+        "url": "https://claudecertificationguide.com/learn/3-claude-code-config/3-2-slash-commands-skills",
+        "cca_f_domain": "claude_code_workflows",
+        "enabled": true,
+        "notes": "Claude Certification Guide (third-party study site)"
+    },
+    {
+        "id": "ccg-3-3-path-specific-rules",
+        "title": "3.3 \u2014 Path-Specific Rules for Conditional Convention Loading",
+        "url": "https://claudecertificationguide.com/learn/3-claude-code-config/3-3-path-specific-rules",
+        "cca_f_domain": "claude_code_workflows",
+        "enabled": true,
+        "notes": "Claude Certification Guide (third-party study site)"
+    },
+    {
+        "id": "ccg-3-4-plan-mode-execution",
+        "title": "3.4 \u2014 Plan Mode vs Direct Execution",
+        "url": "https://claudecertificationguide.com/learn/3-claude-code-config/3-4-plan-mode-execution",
+        "cca_f_domain": "claude_code_workflows",
+        "enabled": true,
+        "notes": "Claude Certification Guide (third-party study site)"
+    },
+    {
+        "id": "ccg-3-5-iterative-refinement",
+        "title": "3.5 \u2014 Iterative Refinement Techniques",
+        "url": "https://claudecertificationguide.com/learn/3-claude-code-config/3-5-iterative-refinement",
+        "cca_f_domain": "claude_code_workflows",
+        "enabled": true,
+        "notes": "Claude Certification Guide (third-party study site)"
+    },
+    {
+        "id": "ccg-3-6-cicd-integration",
+        "title": "3.6 \u2014 CI/CD Integration",
+        "url": "https://claudecertificationguide.com/learn/3-claude-code-config/3-6-cicd-integration",
+        "cca_f_domain": "claude_code_workflows",
+        "enabled": true,
+        "notes": "Claude Certification Guide (third-party study site)"
+    },
+    {
+        "id": "ccg-4-1-system-prompts",
+        "title": "4.1 \u2014 System Prompts with Explicit Criteria",
+        "url": "https://claudecertificationguide.com/learn/4-prompt-engineering/4-1-system-prompts",
+        "cca_f_domain": "prompt_engineering",
+        "enabled": true,
+        "notes": "Claude Certification Guide (third-party study site)"
+    },
+    {
+        "id": "ccg-4-2-few-shot-prompting",
+        "title": "4.2 \u2014 Few-Shot Prompting",
+        "url": "https://claudecertificationguide.com/learn/4-prompt-engineering/4-2-few-shot-prompting",
+        "cca_f_domain": "prompt_engineering",
+        "enabled": true,
+        "notes": "Claude Certification Guide (third-party study site)"
+    },
+    {
+        "id": "ccg-4-3-structured-output",
+        "title": "4.3 \u2014 Structured Output with Tool Use",
+        "url": "https://claudecertificationguide.com/learn/4-prompt-engineering/4-3-structured-output",
+        "cca_f_domain": "prompt_engineering",
+        "enabled": true,
+        "notes": "Claude Certification Guide (third-party study site)"
+    },
+    {
+        "id": "ccg-4-4-validation-retry-loops",
+        "title": "4.4 \u2014 Validation, Retry, and Feedback Loops",
+        "url": "https://claudecertificationguide.com/learn/4-prompt-engineering/4-4-validation-retry-loops",
+        "cca_f_domain": "prompt_engineering",
+        "enabled": true,
+        "notes": "Claude Certification Guide (third-party study site)"
+    },
+    {
+        "id": "ccg-4-5-batch-processing",
+        "title": "4.5 \u2014 Batch Processing Strategies",
+        "url": "https://claudecertificationguide.com/learn/4-prompt-engineering/4-5-batch-processing",
+        "cca_f_domain": "prompt_engineering",
+        "enabled": true,
+        "notes": "Claude Certification Guide (third-party study site)"
+    },
+    {
+        "id": "ccg-4-6-multi-pass-review",
+        "title": "4.6 \u2014 Multi-Instance and Multi-Pass Review",
+        "url": "https://claudecertificationguide.com/learn/4-prompt-engineering/4-6-multi-pass-review",
+        "cca_f_domain": "prompt_engineering",
+        "enabled": true,
+        "notes": "Claude Certification Guide (third-party study site)"
+    },
+    {
+        "id": "ccg-5-1-context-window-management",
+        "title": "5.1 \u2014 Context Window Management",
+        "url": "https://claudecertificationguide.com/learn/5-context-management/5-1-context-window-management",
+        "cca_f_domain": "context_management",
+        "enabled": true,
+        "notes": "Claude Certification Guide (third-party study site)"
+    },
+    {
+        "id": "ccg-5-2-escalation-ambiguity",
+        "title": "5.2 \u2014 Escalation & Ambiguity Resolution",
+        "url": "https://claudecertificationguide.com/learn/5-context-management/5-2-escalation-ambiguity",
+        "cca_f_domain": "context_management",
+        "enabled": true,
+        "notes": "Claude Certification Guide (third-party study site)"
+    },
+    {
+        "id": "ccg-5-3-error-propagation",
+        "title": "5.3 \u2014 Error Propagation in Multi-Agent Systems",
+        "url": "https://claudecertificationguide.com/learn/5-context-management/5-3-error-propagation",
+        "cca_f_domain": "context_management",
+        "enabled": true,
+        "notes": "Claude Certification Guide (third-party study site)"
+    },
+    {
+        "id": "ccg-5-4-codebase-exploration",
+        "title": "5.4 \u2014 Codebase Exploration & Context Degradation",
+        "url": "https://claudecertificationguide.com/learn/5-context-management/5-4-codebase-exploration",
+        "cca_f_domain": "context_management",
+        "enabled": true,
+        "notes": "Claude Certification Guide (third-party study site)"
+    },
+    {
+        "id": "ccg-5-5-human-review-calibration",
+        "title": "5.5 \u2014 Human Review & Confidence Calibration",
+        "url": "https://claudecertificationguide.com/learn/5-context-management/5-5-human-review-calibration",
+        "cca_f_domain": "context_management",
+        "enabled": true,
+        "notes": "Claude Certification Guide (third-party study site)"
+    },
+    {
+        "id": "ccg-5-6-information-provenance",
+        "title": "5.6 \u2014 Information Provenance & Multi-Source Synthesis",
+        "url": "https://claudecertificationguide.com/learn/5-context-management/5-6-information-provenance",
+        "cca_f_domain": "context_management",
+        "enabled": true,
+        "notes": "Claude Certification Guide (third-party study site)"
+    }
+]

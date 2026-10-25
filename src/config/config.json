@@ -1,0 +1,46 @@
+{
+    "logging": {
+        "level": "INFO"
+    },
+    "ingestion": {
+        "enabled": true,
+        "timeout": 30,
+        "memory": {
+            "type": "persistent",
+            "path": "src/ingestion/persistent_memory.db"
+        },
+        "sources_path": "src/ingestion/sources.json"
+    },
+    "categories": [
+        {
+            "tag": "agentic_architecture",
+            "description": "Agentic Architecture and Orchestration",
+            "weight": 0.27,
+            "amount_of_questions": 16
+        },
+        {
+            "tag": "tool_design_mcp",
+            "description": "Tool design and MCP integration",
+            "weight": 0.18,
+            "amount_of_questions": 11
+        },
+        {
+            "tag": "claude_code_workflows",
+            "description": "Claude Code Configuration and Workflows",
+            "weight": 0.20,
+            "amount_of_questions": 12
+        },
+        {
+            "tag": "prompt_engineering",
+            "description": "Prompt Engineering and Structured Output",
+            "weight": 0.20,
+            "amount_of_questions": 12
+        },
+        {
+            "tag": "context_management",
+            "description": "Context Management and Reliability",
+            "weight": 0.15,
+            "amount_of_questions": 9
+        }
+    ]
+}
