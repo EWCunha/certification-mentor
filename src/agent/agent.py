@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any, Optional, Union
 from logging import getLogger
 from toyaikit.tools import Tools
 from openai.types.responses import Response
@@ -9,32 +9,38 @@ from state.state import State
 
 SYSTEM_PROMPT = """
 You are an expert in Anthropic's Claude Certified Architect - Foundations (CCAR-F). I need you to help the user study for the CCAR-F exam.
-You will generate me a simulated exam question and answer based on the CCAR-F exam objectives. The exam has a total of {total_amount_of_questions} questions, 
+You will generate a simulated exam question and answers based on the CCAR-F exam objectives. The exam has a total of {total_amount_of_questions} questions, 
 separated into {exam_categories_amount} categories:
 <exam_categories>
 {exam_categories}
 </exam_categories>
 
-You will generate 1 questions with multiple choice answers per turn. After the user answers the question, you will tell if the answer is either CORRECT or INCORRECT. 
+You will generate 1 question with multiple choice answers per turn. Use the following structure for the question:
+<question_tag>
+Question <question number>: <question text>
+[choices]
+</question_tag>
+
+After the user answers the question, you will tell if the answer is either CORRECT or INCORRECT. 
 If the answer is INCORRECT, you will provide the correct answer and explanation as well as the reason why the given answer is incorrect. 
 You will continue to generate questions and answers until the user has answered all the questions in the exam.
 
 For the first question, just generate the question and choices. Do not provide the answer or explanation.
 After that, you will use the following format for your responses:
 
+<evaluation_tag>
 <CORRECT or INCORRECT>
 If INCORRECT:
     Correct answer: [correct answer]
     Explanation: [explanation]
     Reason why the given answer is incorrect: [reason why the given answer is incorrect]
-
-<Next question number>: <next question number>
-[choices]
+</evaluation_tag>
 
 After the user has answered all the questions, you will provide the total score and the percentage of questions answered correctly.
 You will also provide the sources that the user can use to study the questions that they got wrong.
 
 Your last response should be in the following format:
+<result_tag>
 Result:
     [correct answers count] / {total_amount_of_questions} ([percentage of questions answered correctly])
     Per category:
@@ -45,17 +51,16 @@ Result:
             [question number answered wrong]: [source to study the question]
             ...
         }}
-
+</result_tag>
 
 To help you keep track of the generated questions and answers, you can use the following tools:
 <provided_tools>
-- add_question(category: str, question: str, choices: list[str], correct_answer: str, explanation: str) -> int: adds a question to the list of questions and returns the question number
-- add_answer(question_number: int, answer: str) -> bool: adds an answer to a generated question and returns True if the answer is correct, False otherwise
-- add_reason(question_number: int, reason: str): adds a reason to a wrong answered question
+- add_question(category: str, question: str, choices: list[str], correct_answer: str, explanation: str) -> int: adds a question to the list of questions and returns the question number. Call this EVERY TIME you generate a question. Obs.: `correct_answer` is the letter/choice of the correct answer.
+- add_reason(question_number: int, reason: str): adds a reason to a wrong answered question. Call this EVERY TIME the user answers a question incorrectly.
 - get_questions_count(category: str) -> int: returns the number of generated questions in a category
 - get_all_questions() -> list[dict[str, Any]]: returns the list of all generated questions
-- search(category: str, query: str) -> list[dict[str, Any]]: returns the context for a category and a query to help you generate the next question.
-- exam_stats() -> dict[str, Any]: returns the statistics of the exam
+- search(category: str, query: str) -> list[dict[str, Any]]: returns the context for a category and a query to help you generate the next question. Treat this as an indexer. You HAVE to call this tool to check if the question is fully answerable from the documents
+- exam_stats() -> dict[str, Any]: returns the statistics of the exam. CAll this when the exam is over or when the user wants to end the exam.
 - end_exam() -> None: ends the exam. This should be the last tool to be called and it will be the last response from you. 
 </provided_tools>
 
@@ -110,43 +115,43 @@ class Agent:
         logger = getLogger(__name__)
         logger.debug("Looping agent")
 
-        is_first_turn = True
-        should_skip_next_prompt = False
-        while True:
-            if not should_skip_next_prompt:
-                if is_first_turn:
-                    prompt = input(">>> ")
-                    is_first_turn = False
+        started = False
+        tools = self._tools()
+        while not state.is_exam_ended():
+            if state.questions and state.questions[-1].given_answer == "":
+                question = state.questions[-1]
+                question.print()
+                prompt = input("Answer: ")
+                if len(prompt) == 1:
+                    correct = state.add_answer(question.number, prompt)
+                    self._add_user_message(
+                        f"The user answered {prompt}. "
+                        f"The recorded result is {'correct' if correct else 'incorrect'}."
+                    )
+                    is_correct_str = "CORRECT" if correct else "INCORRECT"
+                    print(f"{is_correct_str}\n\nGenerating next question...")
                 else:
-                    prompt = input("Answer: ")
-            else:
-                should_skip_next_prompt = False
+                    self._add_user_message(prompt)
+            elif not started:
+                started = True
+                self._add_user_message("start")
 
-            self._add_user_message(prompt)
-            logger.debug(f"Message history: {self.message_history}")
-            response = self.rag.llm(self.message_history, self.tools.get_tools())
+            response = self.rag.llm(self.message_history, tools)
             self._add_assistant_message(response)
             for item in response.output:
                 logger.debug(f"Item: {item}")
                 if item.type == "function_call":
-                    logger.info(f"Function call: {item}")
-                    should_skip_next_prompt = True
+                    logger.debug(f"Function call: {item}")
                     result = self.tools.function_call(item)
-                    logger.info(f"Function call result: {result}")
-
+                    logger.debug(f"Function call result: {result}")
+                    logger.info(
+                        f"Function called {item.name}, with arguments {item.arguments}"
+                    )
                     self._add_function_call_result(result)
                     if item.name == "end_exam":
-                        state.end_exam()
                         break
-                    elif item.name == "exam_stats":
-                        should_skip_next_prompt = True
-
                 elif item.type == "message":
-                    should_skip_next_prompt = False
-                    print(f"{item.content[0].text}\n")
-
-            if state.is_exam_ended():
-                break
+                    print(f"{self._remove_tags(item.content[0].text)}\n")
 
     def _add_user_message(self, prompt: str) -> None:
         self.message_history.append({"role": "user", "content": prompt})
@@ -156,3 +161,48 @@ class Agent:
 
     def _add_function_call_result(self, result: Any) -> None:
         self.message_history.append(result)
+
+    def _is_question_message(self, message: Union[dict, Response]) -> bool:
+        if isinstance(message, Response):
+            print("message dict: ", message.to_dict())
+            msg_str = message.output[0].content[0].text
+        elif isinstance(message, dict):
+            msg_str = message.get("content", "")
+
+        return msg_str[:14] == "<question_tag>" and msg_str[-15:] == "</question_tag>"
+
+    def _is_evaluation_message(self, message: Union[dict, Response]) -> bool:
+        if isinstance(message, Response):
+            msg_str = message.output[0].content[0].text
+        elif isinstance(message, dict):
+            msg_str = message.get("content", "")
+
+        return (
+            msg_str[:16] == "<evaluation_tag>" and msg_str[-17:] == "</evaluation_tag>"
+        )
+
+    def _is_result_message(self, message: Union[dict, Response]) -> bool:
+        if isinstance(message, Response):
+            msg_str = message.output[0].content[0].text
+        elif isinstance(message, dict):
+            msg_str = message.get("content", "")
+
+        return msg_str[:12] == "<result_tag>" and msg_str[-13:] == "</result_tag>"
+
+    def _remove_tags(self, message: str) -> str:
+        message = message.replace("<question_tag>", "")
+        message = message.replace("</question_tag>", "")
+        message = message.replace("<evaluation_tag>", "")
+        message = message.replace("</evaluation_tag>", "")
+        message = message.replace("<result_tag>", "")
+        message = message.replace("</result_tag>", "")
+        return message
+
+    def _tools(self) -> list[Tools]:
+        tools = self.tools.get_tools()
+        tools_to_return = []
+        for tool in tools:
+            if tool["name"] != "add_answer":
+                tools_to_return.append(tool)
+
+        return tools_to_return

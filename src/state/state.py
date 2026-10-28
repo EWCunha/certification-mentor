@@ -31,6 +31,11 @@ class Question:
             "reason": self.reason,
         }
 
+    def print(self):
+        print(f"{self.question}")
+        for choice in self.choices:
+            print(f"  {choice}")
+
 
 class State:
     index: SearchIndex
@@ -90,14 +95,17 @@ class State:
 
         Args:
             category (str): The category of the question.
-            question (str): The question.
+            question (str): The question text only (NOT the choices!).
             choices (list[str]): The choices of the question.
-            correct_answer (str): The correct answer.
+            correct_answer (str): The correct answer. Give only the choice letter, not the choice text.
             explanation (str): The explanation of the question.
 
         Returns:
             int: The number of the question.
         """
+
+        if isinstance(choices, str):
+            choices = choices.split("\n")
 
         question_number = self._next_question_number
         self.questions.append(
@@ -125,7 +133,7 @@ class State:
 
         Args:
             question_number (int): The number of the question.
-            given_answer (str): The given answer.
+            given_answer (str): The given answer. Give only the choice letter, not the choice text.
 
         Returns:
             bool: True if the answer is correct, False otherwise.
@@ -185,7 +193,7 @@ class State:
 
         The statistics is a dictionary with the following structure:
         - overall: A dictionary with the following keys:
-            - correct (int): The number of correct answers.
+            - correct: The number of correct answers.
             - wrong (list[int]): The list of wrong-answered questions.
             - total (int): The total number of questions.
         - per_category (dict[str, dict[str, Any]]): A dictionary with the following structure:
@@ -219,11 +227,6 @@ class State:
         return stats
 
     def end_exam(self) -> None:
-        """
-        End the exam.
-
-        """
-
         logger = getLogger(__name__)
         logger.debug("Ending exam")
         self._exam_ended = True
@@ -232,17 +235,6 @@ class State:
         return self._exam_ended
 
     def search(self, category: str, query: str) -> list[dict[str, Any]]:
-        """
-        Search the index for a query.
-
-        Args:
-            category (str): The category.
-            query (str): The query.
-
-        Returns:
-            list[dict[str, Any]]: The list of search results.
-        """
-
         return self.index.search(
             query,
             num_results=100,
