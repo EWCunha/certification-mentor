@@ -95,7 +95,7 @@ class State:
 
         Args:
             category (str): The category of the question.
-            question (str): The question text only (NOT the choices!).
+            question (str): The question text/header only (NOT the choices!).
             choices (list[str]): The choices of the question.
             correct_answer (str): The correct answer. Give only the choice letter, not the choice text.
             explanation (str): The explanation of the question.
