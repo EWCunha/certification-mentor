@@ -9,7 +9,9 @@ dependencies = [
     "beautifulsoup4>=4.15.0",
     "httpx>=0.28.1",
     "openai>=3.37.0",
+    "psycopg[binary]>=3.3.7",
     "python-dotenv>=1.2.4",
+    "sentence-transformers>=6.2.0",
     "sqlitesearch>=0.3.0",
     "toyaikit>=0.0.11",
 ]

@@ -1,9 +1,9 @@
-from typing import Any
-from json import loads, dumps
+from typing import Any, Union
 from dataclasses import dataclass
 from logging import getLogger
 from openai.types.responses import ResponseFunctionToolCall
-from agent.index_interface import SearchIndex
+from agent.rag_helper import RAGBase
+from agent.rag_vector import RAGPgVector
 
 
 @dataclass
@@ -38,14 +38,14 @@ class Question:
 
 
 class State:
-    index: SearchIndex
+    rag: Union[RAGBase, RAGPgVector]
     questions: list[Question] = []
     count_per_category: dict[str, int] = {}
     _next_question_number: int = 1
     _exam_ended: bool = False
 
-    def __init__(self, index: SearchIndex):
-        self.index = index
+    def __init__(self, rag: Union[RAGBase, RAGPgVector]):
+        self.rag = rag
 
     # def make_call(self, call: ResponseFunctionToolCall) -> dict[str, Any]:
     #     logger = getLogger(__name__)
@@ -235,12 +235,19 @@ class State:
         return self._exam_ended
 
     def search(self, category: str, query: str) -> list[dict[str, Any]]:
-        return self.index.search(
-            query,
-            num_results=100,
-            boost_dict={"text": 3.0},
-            filter_dict={"cca_f_domain": category, "enabled": True},
-        )
+        if isinstance(self.rag, RAGPgVector):
+            return self.rag.search(
+                query,
+                num_results=10,
+                filter_dict={"cca_f_domain": category, "enabled": True},
+            )
+        else:
+            return self.rag.search(
+                query,
+                num_results=100,
+                boost_dict={"text": 3.0},
+                filter_dict={"cca_f_domain": category, "enabled": True},
+            )
 
     def _check_question_number(self, question_number: int) -> None:
         if question_number >= self._next_question_number:

@@ -6,8 +6,10 @@
         "enabled": true,
         "timeout": 30,
         "memory": {
-            "type": "persistent",
-            "path": "src/ingestion/persistent_memory.db"
+            "type": "vector_db",
+            "path": "src/ingestion/persistent_memory.db",
+            "url": "postgresql://{user}:{password}@{host}:{port}/{db_name}",
+            "embedding_model": "all-MiniLM-L6-v2"
         },
         "sources_path": "src/ingestion/sources.json"
     },

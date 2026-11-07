@@ -12,3 +12,5 @@ wheels/
 
 # Persistent memory
 src/ingestion/persistent_memory.db
+
+commands.txt
