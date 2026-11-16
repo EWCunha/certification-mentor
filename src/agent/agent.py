@@ -1,4 +1,5 @@
 from typing import Any, Optional, Union
+from json import loads
 from logging import getLogger
 from toyaikit.tools import Tools
 from openai.types.responses import Response
@@ -15,46 +16,41 @@ separated into {exam_categories_amount} categories:
 {exam_categories}
 </exam_categories>
 
-You will generate 1 question with multiple choice answers per turn. Use the following structure for the question:
-<question_tag>
-Question <question number>: <question text>
-A. <choice 1>
-B. <choice 2>
-C. <choice 3>
-D. <choice 4>
-</question_tag>
+You will generate 1 question with multiple choice answers per turn. Use the following JSON object structure for the question:
+{{
+    "stem": "<question text>",
+    "choices": [
+        "<choice 1>",
+        "<choice 2>",
+        "<choice 3>",
+        "<choice 4>"
+    ],
+    "correct_answer": "<correct answer>",
+    "explanation": "<explanation>"
+}}
 
-After the user answers the question, you will tell if the answer is either CORRECT or INCORRECT. 
-If the answer is INCORRECT, you will provide the correct answer and explanation as well as the reason why the given answer is incorrect. 
-You will continue to generate questions and answers until the user has answered all the questions in the exam.
+If the user answers the question incorrectly, I'll forward to you the user's answer. You will then provide the reason why the given answer is incorrect,
+following the JSON object structure:
+{{
+    "reason_why_incorrect": "<reason why the given answer is incorrect>"
+}}
 
-For the first question, just generate the question and choices. Do not provide the answer or explanation.
-After that, you will use the following format for your responses:
-
-<evaluation_tag>
-CORRECT or INCORRECT
-If INCORRECT:
-    Correct answer: <correct answer>
-    Explanation: <explanation>
-    Reason why the given answer is incorrect: <reason why the given answer is incorrect>
-</evaluation_tag>
+If the user answers the question correctly, I'll just send you a message like "CORRECT".
 
 After the user has answered all the questions, you will provide the total score and the percentage of questions answered correctly.
 You will also provide the sources that the user can use to study the questions that they got wrong.
 
-Your last response should be in the following format:
-<result_tag>
-Result:
-    <correct answers count> / {total_amount_of_questions} (<percentage of questions answered correctly>)
-    Per category:
+Your last response should be in the following JSON object format:
+{{
+    "correct_answers_count": <correct answers count>,
+    "percentage_of_questions_answered_correctly": <percentage of questions answered correctly>,
+    "per_category": {{
         <category name>: {{
-            Result: <number of questions answered correctly> / <number of questions in category> (<percentage of questions answered correctly in category>)
-            <question number answered wrong>: <source to study the question>
-            <question number answered wrong>: <source to study the question>
-            <question number answered wrong>: <source to study the question>
-            ...
+            "result": <number of questions answered correctly> / <number of questions in category> (<percentage of questions answered correctly in category>),
+            "question_number_answered_wrong": <source to study the question>
         }}
-</result_tag>
+    }}
+}}
 
 The first user input should be something like "start" or "begin" to start the exam. If it is not something like that, you will ask something like "Shall we start the exam?"
 If the user input is "end" or "stop", you should end the exam and provide the result.
@@ -148,9 +144,14 @@ class Agent:
         logger.debug("Looping agent")
 
         started = False
+        question_shown = False
         tools = self._tools()
         while not state.is_exam_ended():
-            if state.questions and state.questions[-1].given_answer == "":
+            if (
+                state.questions
+                and state.questions[-1].given_answer == ""
+                and question_shown
+            ):
                 question = state.questions[-1]
                 # question.print()
                 prompt = input("Answer: ")
@@ -160,8 +161,8 @@ class Agent:
                         f"The user answered {prompt}. "
                         f"The recorded result is {'CORRECT' if correct else 'INCORRECT'}."
                     )
-                    # is_correct_str = "CORRECT" if correct else "INCORRECT"
-                    # print(f"{is_correct_str}\n\nGenerating next question...")
+                    if correct:
+                        print("CORRECT\n\nGenerating next question...")
                 else:
                     self._add_user_message(prompt)
             elif not started:
@@ -173,6 +174,8 @@ class Agent:
             for item in response.output:
                 logger.debug(f"Item: {item}")
                 if item.type == "function_call":
+                    question_shown = False
+
                     logger.debug(f"Function call: {item}")
                     result = self.tools.function_call(item)
                     logger.debug(f"Function call result: {result}")
@@ -184,19 +187,23 @@ class Agent:
                         break
                 elif item.type == "message":
                     if item.content[0].text == "":
+                        question_shown = False
                         continue
 
-                    is_correct, reason = self._check_message_format(
-                        item.content[0].text
-                    )
-                    if not is_correct:
-                        logger.warning(f"Message format is incorrect: {reason}")
-                        self._add_user_message(
-                            f"The message format is incorrect: {reason}"
+                    try:
+                        last_question = state.last_question()
+                        self._print_message(
+                            item.content[0].text,
+                            last_question.number,
+                            last_question.correct_answer,
+                        )
+                    except Exception as e:
+                        logger.warning(
+                            f"Error printing question: {e}. Text: {item.content[0].text}"
                         )
                         continue
 
-                    print(f"{self._remove_tags(item.content[0].text)}\n")
+                    question_shown = True
 
     def _add_user_message(self, prompt: str) -> None:
         self.message_history.append({"role": "user", "content": prompt})
@@ -207,88 +214,29 @@ class Agent:
     def _add_function_call_result(self, result: Any) -> None:
         self.message_history.append(result)
 
-    def _is_question_message(self, message: Union[dict, Response, str]) -> bool:
-        if isinstance(message, Response):
-            print("message dict: ", message.to_dict())
-            msg_str = message.output[0].content[0].text
-        elif isinstance(message, dict):
-            msg_str = message.get("content", "")
-        elif isinstance(message, str):
-            msg_str = message
-
-        return msg_str[:14] == "<question_tag>" and msg_str[-15:] == "</question_tag>"
-
-    def _is_evaluation_message(self, message: Union[dict, Response, str]) -> bool:
-        if isinstance(message, Response):
-            msg_str = message.output[0].content[0].text
-        elif isinstance(message, dict):
-            msg_str = message.get("content", "")
-        elif isinstance(message, str):
-            msg_str = message
-
-        return (
-            msg_str[:16] == "<evaluation_tag>" and msg_str[-17:] == "</evaluation_tag>"
-        )
-
-    def _is_result_message(self, message: Union[dict, Response, str]) -> bool:
-        if isinstance(message, Response):
-            msg_str = message.output[0].content[0].text
-        elif isinstance(message, dict):
-            msg_str = message.get("content", "")
-        elif isinstance(message, str):
-            msg_str = message
-
-        return msg_str[:12] == "<result_tag>" and msg_str[-13:] == "</result_tag>"
-
-    def _remove_tags(self, message: str) -> str:
-        message = message.replace("<question_tag>", "")
-        message = message.replace("</question_tag>", "")
-        message = message.replace("<evaluation_tag>", "")
-        message = message.replace("</evaluation_tag>", "")
-        message = message.replace("<result_tag>", "")
-        message = message.replace("</result_tag>", "")
-        return message
-
     def _tools(self) -> list:
         tools = self.tools.get_tools()
         tools_to_return = []
         for tool in tools:
-            if tool["name"] != "add_answer":
+            if not tool["name"] in ["add_answer"]:
                 tools_to_return.append(tool)
 
         return tools_to_return
 
-    def _check_message_format(self, message: str) -> tuple[bool, str]:
-        if self._is_question_message(message):
-            prompt = f"""The message is a question. Please check the format of the question and tell me in few 
-            words what is wrong. If it is correct, answer 'correct'. The question is:\n{message}"""
-            response = self.rag.llm(
-                [
-                    {"role": "system", "content": self.checker_system_prompt},
-                    {"role": "user", "content": prompt},
-                ]
-            )
-        elif self._is_evaluation_message(message):
-            prompt = f"""The message is an evaluation. Please check the format of the evaluation and tell me in few 
-            words what is wrong. If it is correct, answer 'correct'. The evaluation is:\n{message}"""
-            response = self.rag.llm(
-                [
-                    {"role": "system", "content": self.checker_system_prompt},
-                    {"role": "user", "content": prompt},
-                ]
-            )
-        elif self._is_result_message(message):
-            prompt = f"""The message is a result. Please check the format of the result and tell me in few 
-            words what is wrong. If it is correct, answer 'correct'. The result is:\n{message}"""
-            response = self.rag.llm(
-                [
-                    {"role": "system", "content": self.checker_system_prompt},
-                    {"role": "user", "content": prompt},
-                ]
+    def _print_message(
+        self,
+        text: str,
+        question_number: int,
+        correct_answer: str,
+    ):
+        question = loads(text)
+        if "reason_why_incorrect" in question:
+            print(
+                f"Correct answer is: {correct_answer}.\nWhy given answer is incorrect: {question['reason_why_incorrect']}."
             )
         else:
-            logger = getLogger(__name__)
-            logger.warning(f"Message format is not recognized: {message}")
-            return False, ""
+            print(f"{question_number}: {question['stem']}")
+            for choice in question["choices"]:
+                print(f"  {choice}")
 
-        return response.output_text.lower() == "correct", response.output_text
+        print()

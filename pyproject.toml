@@ -12,6 +12,7 @@ dependencies = [
     "psycopg[binary]>=3.3.7",
     "python-dotenv>=1.2.4",
     "sentence-transformers>=6.2.0",
+    "sqlalchemy>=2.1.8",
     "sqlitesearch>=0.3.0",
     "toyaikit>=0.0.11",
 ]

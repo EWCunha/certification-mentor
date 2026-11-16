@@ -13,4 +13,7 @@ wheels/
 # Persistent memory
 src/ingestion/persistent_memory.db
 
+# Eval question bank
+src/evals/eval.db
+
 commands.txt

@@ -1,4 +1,3 @@
-from os import getenv
 from json import load
 from sqlitesearch import TextSearchIndex
 from time import sleep

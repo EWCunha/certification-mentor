@@ -1,6 +1,6 @@
 {
     "logging": {
-        "level": "WARNING"
+        "level": "DEBUG"
     },
     "ingestion": {
         "enabled": true,

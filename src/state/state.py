@@ -1,4 +1,4 @@
-from typing import Any, Union
+from typing import Any, Union, Optional
 from dataclasses import dataclass
 from logging import getLogger
 from openai.types.responses import ResponseFunctionToolCall
@@ -96,7 +96,7 @@ class State:
         Args:
             category (str): The category of the question.
             question (str): The question text/header only (NOT the choices!).
-            choices (list[str]): The choices of the question.
+            choices (list[str]): List of the choices for the question.
             correct_answer (str): The correct answer. Give only the choice letter, not the choice text.
             explanation (str): The explanation of the question.
 
@@ -183,6 +183,28 @@ class State:
             questions.append(question.json())
 
         return questions
+
+    def last_question(self) -> Optional[Question]:
+        """
+        Get the last question.
+
+        Returns:
+            Optional[Question]: The last question. None if there are no questions.
+        """
+
+        if not self.questions:
+            return None
+
+        return self.questions[-1]
+
+    def last_question_number(self) -> int:
+        """
+        Get the last question number.
+
+        Returns:
+            int: The last question number.
+        """
+        return self._next_question_number - 1
 
     def exam_stats(self) -> dict[str, Any]:
         """

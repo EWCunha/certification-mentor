@@ -16,8 +16,8 @@ class RAGPgVector(RAGBase):
 
     def search(
         self,
-        query,
-        num_results=5,
+        query: str,
+        num_results: int = 5,
         filter_dict: Optional[dict[str, Any]] = {"enabled": True},
     ):
         query_vector = self.embedder.encode(query)
@@ -26,9 +26,6 @@ class RAGPgVector(RAGBase):
         query_string = """
         SELECT source_id, title, url, cca_f_domain, text
         FROM documents
-        WHERE enabled = TRUE AND cca_f_domain = %s
-        ORDER BY embedding <=> %s::vector
-        LIMIT %s
         """
 
         if filter_dict is not None:
