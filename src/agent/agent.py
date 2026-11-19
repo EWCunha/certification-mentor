@@ -17,6 +17,8 @@ separated into {exam_categories_amount} categories:
 {exam_categories}
 </exam_categories>
 
+Use `search` to search the RAG for documents related to the theme or category of the question.
+
 You will generate 1 question with multiple choice answers (ideally 4 choices) per turn. Only one of the choices should be the correct answer. Provide the choices as a list of strings,
 do NOT include the question header in the choices and do NOT include the choice letters.
 

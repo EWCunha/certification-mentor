@@ -1,5 +1,5 @@
 from typing import Any, Union, Optional
-from json import dumps
+from json import dumps, loads
 from string import ascii_uppercase
 from random import shuffle
 from dataclasses import dataclass
@@ -109,7 +109,7 @@ class State:
         explanation: str,
     ) -> int:
         """
-        Add a question to the state.
+        Add a question to the state. The choices are shuffled and the correct answer is corrected to the index of the correct answer in the shuffled choices.
 
         Args:
             category (str): The category of the question.
@@ -123,17 +123,9 @@ class State:
         """
 
         if isinstance(choices, str):
-            choices = choices.replace("[", "").replace("]", "")
-            choices = choices.strip()
-            choices_list = choices.split("\n")
-            if len(choices_list) < 4:
-                choices = choices.replace("\n", ",")
-                choices = choices.replace("[", "").replace("]", "")
-                choices = choices.strip()
-                choices_list = choices.split('",')
-                for i in range(len(choices_list)):
-                    choices_list[i] = choices_list[i].replace('"', "")
-                    choices_list[i] = choices_list[i].strip()
+            choices_list = loads(choices.strip().removesuffix(","))
+        else:
+            choices_list = list(choices)
 
         correct_answer_str = choices_list[correct_answer]
         shuffle(choices_list)
@@ -309,7 +301,7 @@ class State:
         return self._exam_ended
 
     def search(
-        self, category: str, query: str, num_results: int = 10
+        self, category: str, query: str, num_results: int = 20
     ) -> list[dict[str, Any]]:
         """
         Search the RAG for documents related to the query.
@@ -317,7 +309,7 @@ class State:
         Args:
             category (str): The category of the question.
             query (str): The query to search for.
-            num_results (int): The number of results to return.
+            num_results (int): The number of results to return. Defaults to 20.
 
         Returns:
             list[dict[str, Any]]: The list of documents.
