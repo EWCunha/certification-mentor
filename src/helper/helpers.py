@@ -15,3 +15,14 @@ def db_connection_string() -> str:
         port=getenv("DATABASE_PORT"),
         db_name=getenv("DATABASE_NAME"),
     )
+
+
+def parse_log_level(log_level: int) -> int:
+    levels = {
+        0: "DEBUG",
+        1: "INFO",
+        2: "WARNING",
+        3: "ERROR",
+        4: "CRITICAL",
+    }
+    return levels[log_level]

@@ -51,17 +51,20 @@ class RAGBase:
 
         return response
 
-    def build_context(self, search_results: list[dict]) -> str:
+    def build_context(
+        self,
+        search_results: list[dict],
+        fields: list[str] = ["title", "cca_f_domain", "notes", "text"],
+    ) -> str:
         logger = getLogger(__name__)
         logger.debug(f"Building context for search results: {search_results}")
 
         lines = []
 
         for doc in search_results:
-            lines.append("title: " + doc["title"])
-            lines.append("ccfa_domain: " + doc["ccfa_domain"])
-            lines.append("notes: " + doc["notes"])
-            lines.append("text: " + doc["text"])
+            for field in fields:
+                lines.append(f"{field}: {doc[field]}")
+
             lines.append("")
 
         return "\n".join(lines).strip()

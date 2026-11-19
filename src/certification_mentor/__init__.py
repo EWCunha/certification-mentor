@@ -9,7 +9,7 @@ from agent.agent import Agent
 from state.state import State
 from agent.rag_helper import RAGBase
 from agent.rag_vector import RAGPgVector
-from helper.helpers import db_connection_string
+from helper.helpers import db_connection_string, parse_log_level
 from config.config import CONFIG
 
 from ingestion.manager import IngestionManager
@@ -55,7 +55,7 @@ def main():
     # agent.loop(state)
 
     # vector search
-    basicConfig(level=CONFIG.get("logging").get("level"))
+    basicConfig(level=parse_log_level(CONFIG.get("logging").get("level")))
     logger = getLogger(__name__)
     logger.debug("Starting certification mentor")
 
