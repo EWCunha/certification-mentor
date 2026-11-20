@@ -46,10 +46,12 @@ def vector_search_eval(rag: RAGPgVector, max_results: int = 5) -> dict[str, floa
 
     return {
         "exam_guide": {
+            "num_questions": len(exam_guide_evals),
             "hit_rate": hit_rate(all_exam_guide_hits),
             "mrr": mrr(all_exam_guide_hits),
         },
         "other": {
+            "num_questions": len(other_evals),
             "hit_rate": hit_rate(all_other_hits),
             "mrr": mrr(all_other_hits),
         },

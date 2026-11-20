@@ -22,65 +22,85 @@ def rag_eval_generation_with_judge(
     )
 
     judge_system_prompt = """
-    You are a judge that evaluates the quality of the generated answer. The answer must be regarding to a content within the document.
-    The stem, the choices, the correct answer and the explanation are provided to you.
-    Evaluate the following criteria:
-    - The stem is answered by those documents. True if the stem is answered by those documents, false otherwise.
-    - The marked option is right according to those documents. True if the marked option is right according to those documents, false otherwise.
-    - The other options answer the question wrongly. That is, only the correct answer should be correct. True if the other options answer the question wrongly, false otherwise.
-    - The explanation cites a fact that appears in those documents. True if the explanation cites a fact that appears in those documents, false otherwise.
-    Give me the reasoning for your answer.
-    
-    Return true or false for each criterion in a JSON object. The reasoning should be provided in the "reasoning" key, with the reasoning behind each criterion.
-    Examples:
-        {
-            "stem": false,
-            "marked_option": true,
-            "other_options": true,
-            "explanation": false,
-            "reasoning": {
-                "stem": "The stem is not answered by those documents.",
-                "marked_option": "The marked option is not right according to those documents.",
-                "other_options": "The other options answer the question wrongly.",
-                "explanation": "The explanation does not cite a fact that appears in those documents."
-            }
-        };
-        {
-            "stem": true,
-            "marked_option": false,
-            "other_options": false,
-            "explanation": true,
-            "reasoning": {
-                "stem": "The stem is answered by those documents.",
-                "marked_option": "The marked option is not right according to those documents.",
-                "other_options": "At least one of the other options is actually correct.",
-                "explanation": "The explanation cites a fact that appears in those documents."
-            }
-        };
-        {
-            "stem": true,
-            "marked_option": true,
-            "other_options": true,
-            "explanation": true,
-            "reasoning": {
-                "stem": "The stem is answered by those documents.",
-                "marked_option": "The marked option is right according to those documents.",
-                "other_options": "The other options answer the question wrongly.",
-                "explanation": "The explanation cites a fact that appears in those documents."
-            }
-        };
-        {
-            "stem": false,
-            "marked_option": false,
-            "other_options": false,
-            "explanation": false,
-            "reasoning": {
-                "stem": "The stem is not answered by those documents.",
-                "marked_option": "The marked option is not right according to those documents.",
-                "other_options": "At least one of the other options is actually correct.",
-                "explanation": "The explanation does not cite a fact that appears in those documents."
-            }
-        };
+    You grade one generated exam item against one source document. Use only the document text. Do not use outside knowledge.
+
+    The user message has two parts:
+    <document>
+    ...page text...
+    </document>
+    <item>
+    ...generated JSON with stem, choices, correct_answer, and explanation...
+    </item>
+
+    Score these four checks. Each value is true only when the document supports it.
+    - stem: the document contains enough information to answer the stem. True if the document contains enough information to answer the stem, false otherwise.
+    - marked_option: correct_answer is the right choice according to the document. True if the correct answer is the right choice according to the document, false otherwise.
+    - distractors_are_wrong: true when every choice except correct_answer is a wrong answer according to the document. false only when one of those choices is also a right answer, or the document does not say enough to reject it. A wrong distractor is a passed check, so the value is true.
+    - explanation: the explanation states a fact that appears in the document. True if the explanation states a fact that appears in the document, false otherwise.
+
+    When your reason says a distractor is incorrect, distractors_are_wrong is true. Set distractors_are_wrong to false only when a distractor is also a right answer.
+
+    For each check, quote the shortest span from the document that decides it. If the check is false, quote the item text that the document does not support and set the span to an empty string.
+
+    Reply with one JSON object and no other text.
+
+    Example 1. Document: "Project slash commands live in .claude/commands/ and are shared with the repo. ~/.claude/commands/ is for personal commands only. CLAUDE.md holds project instructions, not command definitions. There is no user-settings command file."
+    The marked choice is ".claude/commands/ inside the repository." The others are "~/.claude/commands/", "CLAUDE.md", and "a user settings file." The explanation says project commands are shared with the repo.
+    {
+        "stem": true,
+        "marked_option": true,
+        "distractors_are_wrong": true,
+        "explanation": true,
+        "reasoning": {
+            "stem": {"quote": "Project slash commands live in .claude/commands/", "why": "The page states where a shared slash command is stored."},
+            "marked_option": {"quote": "Project slash commands live in .claude/commands/ and are shared with the repo.", "why": "That sentence is the marked choice."},
+            "distractors_are_wrong": {"quote": "~/.claude/commands/ is for personal commands only. CLAUDE.md holds project instructions, not command definitions. There is no user-settings command file.", "why": "Those choices are wrong answers, so distractors_are_wrong is true."},
+            "explanation": {"quote": "and are shared with the repo.", "why": "The explanation repeats that fact."}
+        }
+    }
+
+    Example 2. Same document. The marked choice is "~/.claude/commands/". The other choices are "CLAUDE.md", "a user settings file", and "store it only as a personal command". None of them is .claude/commands/. The explanation says personal commands are committed with the repository.
+    {
+        "stem": true,
+        "marked_option": false,
+        "distractors_are_wrong": true,
+        "explanation": false,
+        "reasoning": {
+            "stem": {"quote": "Project slash commands live in .claude/commands/", "why": "The page still answers where a shared command goes."},
+            "marked_option": {"quote": "", "why": "The marked path is the personal directory. The page says that directory is not the shared location."},
+            "distractors_are_wrong": {"quote": "~/.claude/commands/ is for personal commands only. CLAUDE.md holds project instructions, not command definitions. There is no user-settings command file.", "why": "Every unmarked choice is also a wrong answer, so distractors_are_wrong is true."},
+            "explanation": {"quote": "", "why": "The explanation says personal commands are committed with the repo. The page says the opposite."}
+        }
+    }
+
+    Example 3. Document: "Run Claude Code in CI with the -p flag so it prints the result and exits. The --print flag is the same option."
+    The marked choice is "-p". Another choice is "--print". The explanation says -p is the non-interactive flag.
+    {
+        "stem": true,
+        "marked_option": true,
+        "distractors_are_wrong": false,
+        "explanation": true,
+        "reasoning": {
+            "stem": {"quote": "Run Claude Code in CI with the -p flag", "why": "The page answers how to run Claude Code in CI."},
+            "marked_option": {"quote": "Run Claude Code in CI with the -p flag so it prints the result and exits.", "why": "The marked flag is the one the page names."},
+            "distractors_are_wrong": {"quote": "The --print flag is the same option.", "why": "--print is also a right answer, so distractors_are_wrong is false."},
+            "explanation": {"quote": "so it prints the result and exits.", "why": "The explanation matches that sentence."}
+        }
+    }
+
+    Example 4. Same CI document. The stem asks which Message Batches API setting saves 50% on overnight jobs. The marked choice is "batch the pre-merge check." The explanation says the Batches API returns in under one second.
+    {
+        "stem": false,
+        "marked_option": false,
+        "distractors_are_wrong": false,
+        "explanation": false,
+        "reasoning": {
+            "stem": {"quote": "", "why": "The page is about the -p flag. It says nothing about the Message Batches API."},
+            "marked_option": {"quote": "", "why": "The page never mentions batching a pre-merge check."},
+            "distractors_are_wrong": {"quote": "", "why": "The page has no batching facts, so a distractor cannot be called wrong. distractors_are_wrong is false."},
+            "explanation": {"quote": "", "why": "The page does not say the Batches API returns in under one second."}
+        }
+    }
     """
 
     exam_categories = CONFIG.get("categories")
@@ -116,16 +136,16 @@ def rag_eval_generation_with_judge(
     metrics = {
         "stem": 0,
         "marked_option": 0,
-        "other_options": 0,
+        "distractors_are_wrong": 0,
         "explanation": 0,
     }
     for eval in evals:
         metrics["stem"] += eval["stem"]
         metrics["marked_option"] += eval["marked_option"]
-        metrics["other_options"] += eval["other_options"]
+        metrics["distractors_are_wrong"] += eval["distractors_are_wrong"]
         metrics["explanation"] += eval["explanation"]
 
-        if eval["other_options"] == False:
+        if eval["distractors_are_wrong"] == False:
             print(eval)
 
     print(f"Total questions: {len(evals)}")
@@ -162,7 +182,10 @@ def _evaluate_questions(
 
         messages = [
             {"role": "system", "content": judge_system_prompt},
-            {"role": "user", "content": generated_question},
+            {
+                "role": "user",
+                "content": f"<document>\n{context}\n</document>\n<item>\n{generated_question}\n</item>",
+            },
         ]
 
         response = judge_llm.responses.create(
