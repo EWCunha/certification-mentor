@@ -13,6 +13,9 @@ wheels/
 # Persistent memory
 src/ingestion/persistent_memory.db
 
+# Monitoring database
+src/monitoring/monitoring.db
+
 # Eval question bank
 src/evals/eval.db
 

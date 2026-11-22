@@ -1,11 +1,14 @@
 from typing import Any, Optional
 from json import dumps
+from uuid import uuid4
 from logging import getLogger, Logger
 from toyaikit.tools import Tools
 from openai.types.responses import Response
 from agent.rag_helper import RAGBase
 from config.config import CONFIG
 from state.state import State, Question
+from monitoring.database import session_for
+from monitoring.schemas import Log
 
 
 SYSTEM_PROMPT = """
@@ -56,6 +59,7 @@ class Agent:
     message_history: list[dict[str, Any]]
     tools: Tools
     _total_amount_of_questions: int
+    _session_id: str
 
     def __init__(
         self,
@@ -85,6 +89,7 @@ class Agent:
         self.system_prompt = system_prompt
         self.message_history = [{"role": "system", "content": self.system_prompt}]
         self.tools = tools
+        self._session_id = ""
 
     def run(self, prompt: str) -> Response:
         logger = getLogger(__name__)
@@ -101,6 +106,7 @@ class Agent:
 
         started = False
         tools = self._tools()
+        self._session_id = str(uuid4())
         while not state.is_exam_ended():
             if state.questions and not state.last_question().answered():
                 question = state.last_question()
@@ -108,6 +114,9 @@ class Agent:
                 prompt = input("Answer: ")
                 if len(prompt) == 1:
                     correct = state.add_answer(question.number, prompt)
+                    self._log_message(
+                        f"User answer: {prompt.upper()}. Correct: {correct}"
+                    )
                     self._add_user_message(
                         dumps(
                             {
@@ -120,6 +129,7 @@ class Agent:
                         print("CORRECT\n\nGenerating next question...")
                 else:
                     if prompt.lower() in ["end", "stop"]:
+                        self._log_message(f"User input: {prompt.lower()}")
                         stats = state.exam_stats()
                         self._add_user_message(
                             self._parse_stats_message(stats, state.questions)
@@ -128,10 +138,14 @@ class Agent:
                         state.end_exam()
                         continue
                     else:
-                        self._add_user_message(prompt)
+                        print(
+                            "Invalid input. Please enter a letter for the choice or 'end' to stop the exam."
+                        )
+                        self._log_message(f"User input: {prompt.lower()}")
             elif not started:
                 started = True
                 self._add_user_message("start")
+                self._log_message(f"User message: start")
             elif state.last_question_number() >= self._total_amount_of_questions:
                 stats = state.exam_stats()
                 self._add_user_message(
@@ -139,12 +153,14 @@ class Agent:
                 )
                 self._to_llm(tools, logger)
                 state.end_exam()
+                self._log_message(f"Exam ended. Stats: {stats}")
                 continue
 
             self._to_llm(tools, logger)
 
     def _to_llm(self, tools: list, logger: Logger) -> None:
         response = self.rag.llm(self.message_history, tools)
+        self._log_message(f"Response: {response}")
         self._add_assistant_message(response)
         for item in response.output:
             logger.debug(f"Item: {item}")
@@ -156,14 +172,17 @@ class Agent:
                     f"Function called {item.name}, with arguments {item.arguments}"
                 )
                 self._add_function_call_result(result)
+                self._log_message(f"Function call: {item}. Result: {result}")
                 if item.name == "end_exam":
                     return
             elif item.type == "message":
                 if item.content[0].text == "":
                     self._add_user_message("continue")
+                    self._log_message(f"User message: continue")
                     continue
 
                 print(item.content[0].text)
+                self._log_message(f"LLM message: {item.content[0].text}")
 
     def _add_user_message(self, prompt: str) -> None:
         self.message_history.append({"role": "user", "content": prompt})
@@ -188,3 +207,8 @@ class Agent:
             stats=stats,
             questions=questions,
         )
+
+    def _log_message(self, message: str) -> None:
+        with session_for() as session:
+            session.add(Log(session_id=self._session_id, message=message))
+            session.commit()
