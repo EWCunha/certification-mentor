@@ -1,3 +1,4 @@
+from logging import getLogger
 from sqlite3 import Connection as SQLiteConnection
 from sqlalchemy import Engine, create_engine, event
 from sqlalchemy.orm import Session
@@ -47,4 +48,5 @@ def session_for(path: Path = DB_PATH) -> Session:
 
 
 if __name__ == "__main__":
-    print(create_database())
+    logger = getLogger(__name__)
+    logger.debug(create_database())

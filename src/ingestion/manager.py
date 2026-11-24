@@ -1,4 +1,5 @@
 from json import load
+from logging import getLogger
 from sqlitesearch import TextSearchIndex
 from time import sleep
 from sentence_transformers import SentenceTransformer
@@ -25,17 +26,23 @@ class IngestionManager:
         if not self.ingestion_config["enabled"]:
             return
 
+        logger = getLogger(__name__)
+        logger.info("Ingesting data...")
         self.sources = self._fetch_all(self.sources)
         if self.ingestion_config["memory"]["type"] == "persistent":
+            logger.info("Adding data to persistent memory...")
             self._add_to_persistent_memory(self.sources)
         elif self.ingestion_config["memory"]["type"] == "vector_db":
+            logger.info("Embedding data...")
             vectors = self._embed_data(self.sources)
+            logger.info("Adding data to vector database...")
             self._add_to_vector_database(self.sources, vectors)
 
     def _fetch_all(self, sources: list[dict]) -> list[dict]:
         """Fetch all the URLs in the sources file."""
 
-        print(f"Fetching {len(sources)} sources...")
+        logger = getLogger(__name__)
+        logger.info(f"Fetching {len(sources)} sources...")
         for source in sources:
             try:
                 page = self.crawler.crawl(
@@ -45,14 +52,15 @@ class IngestionManager:
                 source["title"] = page_data["title"]
                 source["text"] = page_data["text"]
             except Exception as e:
-                print(f"Error crawling {source}: {e}")
+                logger.error(f"Error crawling {source}: {e}")
 
         return sources
 
     def _add_to_persistent_memory(self, json_data: list[dict]):
         """Add data to the persistent memory."""
 
-        print(f"Adding {len(json_data)} documents to persistent memory...")
+        logger = getLogger(__name__)
+        logger.info(f"Adding {len(json_data)} documents to persistent memory...")
 
         index = TextSearchIndex(
             text_fields=["title", "text"],
@@ -62,7 +70,7 @@ class IngestionManager:
 
         for doc in json_data:
             index.add(doc)
-            print(f"""Added: {doc["title"][:60]}...""")
+            logger.info(f"""Added: {doc["title"][:60]}...""")
             sleep(0.5)
 
         index.close()
@@ -70,7 +78,8 @@ class IngestionManager:
     def _embed_data(self, json_data: list[dict]) -> list[list[float]]:
         """Embed the data using the embedding model."""
 
-        print(f"Embedding {len(json_data)} documents...")
+        logger = getLogger(__name__)
+        logger.info(f"Embedding {len(json_data)} documents...")
         model = SentenceTransformer(self.ingestion_config["memory"]["embedding_model"])
         texts = [doc["title"] + " " + doc["text"] for doc in json_data]
 
@@ -87,7 +96,8 @@ class IngestionManager:
     def _add_to_vector_database(
         self, json_data: list[dict], vectors: list[list[float]]
     ):
-        print(f"Adding {len(json_data)} documents to vector database...")
+        logger = getLogger(__name__)
+        logger.info(f"Adding {len(json_data)} documents to vector database...")
 
         connection_string = db_connection_string()
         conn = connect(connection_string)

@@ -29,13 +29,13 @@
         {
             "tag": "claude_code_workflows",
             "description": "Claude Code Configuration and Workflows",
-            "weight": 0.20,
+            "weight": 0.2,
             "amount_of_questions": 12
         },
         {
             "tag": "prompt_engineering",
             "description": "Prompt Engineering and Structured Output",
-            "weight": 0.20,
+            "weight": 0.2,
             "amount_of_questions": 12
         },
         {
